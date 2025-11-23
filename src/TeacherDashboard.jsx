@@ -44,6 +44,26 @@ export default function TeacherDashboard() {
     const current = JSON.parse(localStorage.getItem('currentUser') || '{}');
     setUser(current);
   }, []);
+  /*
+  useEffect(() => {
+    const current = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    setUser(current);
+
+    // Load teacher-specific data
+    loadData();
+
+    // Load GLOBAL submissions & messages
+    const subs = JSON.parse(localStorage.getItem('globalSubmissions') || '[]');
+    const msgs = JSON.parse(localStorage.getItem('globalMessages') || '[]');
+
+    setGlobalSubmissions(subs);
+    setInboxMessages(msgs);
+  }, []);
+
+  // new addition
+  const [globalSubmissions, setGlobalSubmissions] = useState([]);
+  const [inboxMessages, setInboxMessages] = useState([]);
+*/
   const [showModal, setShowModal] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [notifications, setNotifications] = useState([]);
@@ -804,6 +824,112 @@ export default function TeacherDashboard() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        );
+      case 'inbox':
+        return (
+          <div className="space-y-8">
+            {/* Messages */}
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800 mb-4">
+                Student Messages
+              </h2>
+              <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-4">
+                {inboxMessages
+                  .filter((m) => m.to === user.name || m.to === 'Dr. Smith') // adjust
+                  .sort((a, b) => new Date(b.time) - new Date(a.time))
+                  .map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`p-4 rounded-lg border ${
+                        msg.read
+                          ? 'border-slate-200'
+                          : 'border-blue-500 bg-blue-50'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold">
+                            {msg.fromName} ({msg.from})
+                          </p>
+                          <p className="text-sm text-slate-600">
+                            <strong>{msg.subject}</strong>
+                          </p>
+                          <p className="mt-2">{msg.body}</p>
+                        </div>
+                        <p className="text-xs text-slate-500">
+                          {format(new Date(msg.time), 'MMM dd, hh:mm a')}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                {inboxMessages.length === 0 && (
+                  <p className="text-slate-500">No messages yet.</p>
+                )}
+              </div>
+            </div>
+
+            {/* Submissions */}
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800 mb-4">
+                Student Submissions
+              </h2>
+              <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">
+                        Student
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">
+                        Assignment
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">
+                        Course
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">
+                        Submitted
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-slate-600">
+                        Grade
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {globalSubmissions
+                      .sort((a, b) => new Date(b.date) - new Date(a.date))
+                      .map((sub) => (
+                        <tr key={sub.id} className="hover:bg-slate-50">
+                          <td className="px-4 py-3 text-sm">
+                            {sub.studentName}
+                          </td>
+                          <td className="px-4 py-3 text-sm font-medium">
+                            {sub.assignmentTitle}
+                          </td>
+                          <td className="px-4 py-3 text-sm">
+                            {enrolledCourses.find((c) => c.id === sub.courseId)
+                              ?.name || 'Unknown'}
+                          </td>
+                          <td className="px-4 py-3 text-xs text-slate-500">
+                            {format(new Date(sub.date), 'MMM dd, hh:mm a')}
+                          </td>
+                          <td className="px-4 py-3">
+                            {sub.grade !== null ? (
+                              <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-sm">
+                                {sub.grade}%
+                              </span>
+                            ) : (
+                              <button className="text-blue-600 hover:underline text-sm">
+                                Grade
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         );

@@ -1,24 +1,21 @@
+// src/components/ProtectedRoute.jsx
 import { Navigate } from 'react-router-dom';
 
 export default function ProtectedRoute({ children, allowedRoles }) {
-  const user = JSON.parse(localStorage.getItem('currentUser') || 'null');
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   const loginTime = localStorage.getItem('loginTime');
   const isExpired =
-    loginTime && Date.now() - parseInt(loginTime) > 30 * 60 * 1000; // 30 min
+    loginTime && Date.now() - parseInt(loginTime) > 30 * 60 * 1000;
 
-  if (!user || isExpired) {
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('loginTime');
-    return <Navigate to="/" />;
-  }
-
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
   if (!currentUser || isExpired) {
     localStorage.removeItem('currentUser');
     localStorage.removeItem('loginTime');
     return <Navigate to="/" />;
   }
-  if (allowedRoles && !allowedRoles.includes(user.role)) {
+
+  // Compare lowercase
+  const userRole = currentUser.role?.toLowerCase();
+  if (!allowedRoles.map((r) => r.toLowerCase()).includes(userRole)) {
     return <Navigate to="/" />;
   }
 

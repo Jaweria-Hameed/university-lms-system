@@ -3,6 +3,31 @@ import React, { useState } from 'react';
 import { Lock, User, LogIn } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+// ADD THIS RIGHT AFTER THE IMPORTS
+const PREDEFINED_USERS = [
+  {
+    username: 'student1',
+    password: '123',
+    role: 'student',
+    name: 'Alex Chen',
+    dataKey: 'student-data-student1',
+  },
+  {
+    username: 'student2',
+    password: '456',
+    role: 'student',
+    name: 'Sarah Kim',
+    dataKey: 'student-data-student2',
+  },
+  {
+    username: 'student3',
+    password: '789',
+    role: 'student',
+    name: 'Mike Johnson',
+    dataKey: 'student-data-student3',
+  },
+];
+
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
@@ -11,46 +36,147 @@ export default function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  /*
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    if (!username || !password || !role) {
+      setError('All fields are required');
+      return;
+    }
 
     if (isLogin) {
+      // LOGIN MODE
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
       const user = users.find(
         (u) => u.username === username && u.password === password
       );
+
       if (!user) {
         setError('Invalid username or password');
         return;
       }
 
-      // FIX: Use different name
-      const currentUser = { username, role };
+      // SAVE EXACT LOWERCASE ROLE
+      const currentUser = {
+        username: user.username,
+        role: user.role.toLowerCase(), // ← FORCE lowercase
+      };
+
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
       localStorage.setItem('loginTime', Date.now().toString());
 
-      const redirectMap = {
-        teacher: '/teacher',
-        student: '/student',
-        admin: '/admin',
-      };
-      navigate(redirectMap[currentUser.role] || '/teacher');
+      // REDIRECT BASED ON ROLE
+      if (currentUser.role === 'teacher') {
+        navigate('/teacher');
+      } else if (currentUser.role === 'student') {
+        navigate('/student');
+      } else if (currentUser.role === 'admin') {
+        navigate('/admin');
+      }
     } else {
-      if (users.find((u) => u.username === username)) {
+      // REGISTER MODE
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+
+      if (users.some((u) => u.username === username)) {
         setError('Username already exists');
         return;
       }
-      const newUser = { username, password, role };
+
+      const newUser = {
+        username,
+        password,
+        role: role.toLowerCase(), // ← SAVE AS lowercase
+      };
+
       users.push(newUser);
       localStorage.setItem('users', JSON.stringify(users));
-      setError('');
-      setIsLogin(true);
-      alert('Registered! Please login.');
+
+      alert('Registration successful! Please login.');
+      setIsLogin(true); // Switch to login mode
+      setUsername('');
+      setPassword('');
+      setRole('');
     }
   };
+  */
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
 
+    if (!username || !password || (!isLogin && !role)) {
+      setError('All fields are required');
+      return;
+    }
+
+    if (isLogin) {
+      // === LOGIN MODE ===
+      // 1. Check predefined users first
+      const predefinedUser = PREDEFINED_USERS.find(
+        (u) => u.username === username && u.password === password
+      );
+
+      if (predefinedUser) {
+        const currentUser = {
+          username: predefinedUser.username,
+          role: predefinedUser.role,
+          name: predefinedUser.name,
+          dataKey: predefinedUser.dataKey,
+        };
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        localStorage.setItem('loginTime', Date.now().toString());
+        navigate('/student');
+        return;
+      }
+
+      // 2. Fallback: check localStorage users (for registered users)
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const user = users.find(
+        (u) => u.username === username && u.password === password
+      );
+
+      if (!user) {
+        setError('Invalid username or password');
+        return;
+      }
+
+      const currentUser = {
+        username: user.username,
+        role: user.role.toLowerCase(),
+      };
+
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      localStorage.setItem('loginTime', Date.now().toString());
+
+      if (currentUser.role === 'teacher') navigate('/teacher');
+      else if (currentUser.role === 'student') navigate('/student');
+      else if (currentUser.role === 'admin') navigate('/admin');
+    } else {
+      // === REGISTER MODE (unchanged) ===
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+
+      if (users.some((u) => u.username === username)) {
+        setError('Username already exists');
+        return;
+      }
+
+      const newUser = {
+        username,
+        password,
+        role: role.toLowerCase(),
+      };
+
+      users.push(newUser);
+      localStorage.setItem('users', JSON.stringify(users));
+
+      alert('Registration successful! Please login.');
+      setIsLogin(true);
+      setUsername('');
+      setPassword('');
+      setRole('');
+    }
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl p-8 shadow-lg max-w-md w-full">
@@ -114,8 +240,9 @@ export default function Login() {
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
+                <option value="">Select Role</option>
                 <option value="teacher">Teacher</option>
                 <option value="student">Student</option>
                 <option value="admin">Admin</option>

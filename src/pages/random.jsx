@@ -1,3 +1,1295 @@
+// src/pages/StudentDashboard.jsx
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import {
+  GraduationCap,
+  BookOpen,
+  Download,
+  Upload,
+  Bell,
+  Calendar,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  FileText,
+  Video,
+  Star,
+  User,
+  LogOut,
+  Search,
+  ChevronRight,
+  X,
+  Menu,
+  Home,
+  Book,
+  Users,
+  Settings,
+  HelpCircle,
+  ArrowRight,
+  Filter,
+  MoreVertical,
+  Edit,
+  Trash2,
+  Eye,
+  EyeOff,
+  Send,
+  MessageSquare,
+  Award,
+  Target,
+  TrendingUp,
+  Clock3,
+  AlertTriangle,
+  Trophy,
+  Flame,
+  Lock,
+  Unlock,
+  ThumbsUp,
+  ThumbsDown,
+  PlayCircle,
+  PauseCircle,
+  SkipForward,
+  SkipBack,
+  Volume2,
+  VolumeX,
+  CalendarDays,
+  CheckSquare,
+  Square,
+  ChevronDown,
+  Plus,
+  Minus,
+  RefreshCw,
+  BarChart3,
+  PieChart,
+  TrendingDown,
+  Shield,
+  Mail,
+  Phone,
+  Globe,
+  Brain,
+  Zap,
+  Sparkles,
+  Crown,
+  Medal,
+  Gem,
+  Rocket,
+  Heart,
+  Bookmark,
+  Filter as FilterIcon,
+  XCircle,
+  Check,
+  Info,
+  AlertOctagon,
+} from 'lucide-react';
+
+export default function StudentDashboard() {
+  const [user, setUser] = useState({});
+  const [courses, setCourses] = useState([]);
+  const [allCourses, setAllCourses] = useState([]);
+  const [assignments, setAssignments] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [schedule, setSchedule] = useState([]);
+  const [attendance, setAttendance] = useState([]);
+  const [quizzes, setQuizzes] = useState([]);
+  const [badges, setBadges] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [feedbackModal, setFeedbackModal] = useState(null);
+  const [profilePic, setProfilePic] = useState('');
+  const [activeTab, setActiveTab] = useState('overview');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showContactModal, setShowContactModal] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [messageText, setMessageText] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showQuiz, setShowQuiz] = useState(null);
+  const [quizAnswers, setQuizAnswers] = useState({});
+  const [streak, setStreak] = useState(7);
+  const [points, setPoints] = useState(2840);
+
+  // Load user
+  useEffect(() => {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    setUser(currentUser);
+  }, []);
+
+  // Load ALL data
+  useEffect(() => {
+    const saved = localStorage.getItem('student-data-v2');
+    if (saved) {
+      const data = JSON.parse(saved);
+      setCourses(data.courses || []);
+      setAssignments(data.assignments || []);
+      setNotifications(data.notifications || []);
+      setSchedule(data.schedule || []);
+      setAttendance(data.attendance || []);
+      setQuizzes(data.quizzes || []);
+      setBadges(data.badges || []);
+      setLeaderboard(data.leaderboard || []);
+      setProfilePic(data.profilePic || '');
+      setStreak(data.streak || 7);
+      setPoints(data.points || 2840);
+    } else {
+      const defaultData = getDefaultData();
+      localStorage.setItem('student-data-v2', JSON.stringify(defaultData));
+      setCourses(defaultData.courses);
+      setAssignments(defaultData.assignments);
+      setNotifications(defaultData.notifications);
+      setSchedule(defaultData.schedule);
+      setAttendance(defaultData.attendance);
+      setQuizzes(defaultData.quizzes);
+      setBadges(defaultData.badges);
+      setLeaderboard(defaultData.leaderboard);
+      setStreak(defaultData.streak);
+      setPoints(defaultData.points);
+    }
+
+    // Load all available courses for recommendations
+    setAllCourses(getAllAvailableCourses());
+  }, []);
+
+  const saveData = useCallback(() => {
+    const data = {
+      courses,
+      assignments,
+      notifications,
+      schedule,
+      attendance,
+      quizzes,
+      badges,
+      leaderboard,
+      profilePic,
+      streak,
+      points,
+    };
+    localStorage.setItem('student-data-v2', JSON.stringify(data));
+  }, [
+    courses,
+    assignments,
+    notifications,
+    schedule,
+    attendance,
+    quizzes,
+    badges,
+    leaderboard,
+    profilePic,
+    streak,
+    points,
+  ]);
+
+  useEffect(() => {
+    saveData();
+  }, [saveData]);
+
+  const getDefaultData = () => ({
+    courses: [
+      {
+        id: 1,
+        name: 'Advanced Calculus',
+        code: 'MATH301',
+        instructor: 'Dr. Sarah Chen',
+        progress: 82,
+        rating: 4.9,
+        enrolled: '2025-01-15',
+        totalLectures: 40,
+        completedLectures: 33,
+        difficulty: 'Advanced',
+        category: 'Mathematics',
+      },
+      {
+        id: 2,
+        name: 'Quantum Physics',
+        code: 'PHYS401',
+        instructor: 'Prof. James Wilson',
+        progress: 68,
+        rating: 4.7,
+        enrolled: '2025-01-15',
+        totalLectures: 36,
+        completedLectures: 24,
+        difficulty: 'Advanced',
+        category: 'Physics',
+      },
+      {
+        id: 3,
+        name: 'Machine Learning',
+        code: 'CS505',
+        instructor: 'Dr. Emily Rodriguez',
+        progress: 55,
+        rating: 5.0,
+        enrolled: '2025-01-20',
+        totalLectures: 45,
+        completedLectures: 25,
+        difficulty: 'Expert',
+        category: 'Computer Science',
+      },
+      {
+        id: 4,
+        name: 'Organic Chemistry',
+        code: 'CHEM302',
+        instructor: 'Prof. Michael Brown',
+        progress: 91,
+        rating: 4.6,
+        enrolled: '2025-01-18',
+        totalLectures: 38,
+        completedLectures: 35,
+        difficulty: 'Intermediate',
+        category: 'Chemistry',
+      },
+    ],
+    assignments: [
+      {
+        id: 1,
+        title: 'Final Project - Neural Network',
+        courseId: 3,
+        course: 'Machine Learning',
+        due: '2025-04-28',
+        status: 'pending',
+        grade: null,
+        submittedAt: null,
+        feedback: null,
+      },
+      {
+        id: 2,
+        title: 'Quantum Mechanics Problem Set',
+        courseId: 2,
+        course: 'Quantum Physics',
+        due: '2025-04-22',
+        status: 'submitted',
+        grade: 'A',
+        submittedAt: '2025-04-20',
+        feedback: 'Outstanding work on superposition problems!',
+      },
+      {
+        id: 3,
+        title: 'Organic Synthesis Report',
+        courseId: 4,
+        course: 'Organic Chemistry',
+        due: '2025-04-25',
+        status: 'submitted',
+        grade: 'A-',
+        submittedAt: '2025-04-24',
+        feedback: 'Great mechanism drawings.',
+      },
+    ],
+    notifications: [
+      {
+        id: 1,
+        type: 'deadline',
+        message: 'Machine Learning Final Project due in 5 days',
+        time: '2h ago',
+        read: false,
+        courseId: 3,
+      },
+      {
+        id: 2,
+        type: 'grade',
+        message: 'Grade posted: A in Quantum Physics Problem Set',
+        time: '1d ago',
+        read: false,
+        courseId: 2,
+      },
+      {
+        id: 3,
+        type: 'announcement',
+        message: 'New lecture: "Neural Networks Deep Dive" uploaded',
+        time: '2d ago',
+        read: true,
+        courseId: 3,
+      },
+      {
+        id: 4,
+        type: 'reminder',
+        message: "Don't forget to rate Organic Chemistry!",
+        time: '3d ago',
+        read: true,
+        courseId: 4,
+      },
+    ],
+    schedule: [
+      {
+        day: 'Monday',
+        time: '10:00 AM',
+        course: 'Advanced Calculus',
+        room: 'A-301',
+        type: 'Lecture',
+      },
+      {
+        day: 'Monday',
+        time: '02:00 PM',
+        course: 'Quantum Physics',
+        room: 'Lab 5',
+        type: 'Lab',
+      },
+      {
+        day: 'Tuesday',
+        time: '11:00 AM',
+        course: 'Machine Learning',
+        room: 'C-205',
+        type: 'Lecture',
+      },
+      {
+        day: 'Wednesday',
+        time: '09:00 AM',
+        course: 'Advanced Calculus',
+        room: 'A-301',
+        type: 'Tutorial',
+      },
+      {
+        day: 'Thursday',
+        time: '01:00 PM',
+        course: 'Organic Chemistry',
+        room: 'Chem Lab 2',
+        type: 'Lab',
+      },
+      {
+        day: 'Friday',
+        time: '10:00 AM',
+        course: 'Machine Learning',
+        room: 'C-205',
+        type: 'Project',
+      },
+    ],
+    attendance: [
+      {
+        courseId: 1,
+        course: 'Advanced Calculus',
+        present: 28,
+        total: 30,
+        percentage: 93.3,
+      },
+      {
+        courseId: 2,
+        course: 'Quantum Physics',
+        present: 24,
+        total: 28,
+        percentage: 85.7,
+      },
+      {
+        courseId: 3,
+        course: 'Machine Learning',
+        present: 22,
+        total: 26,
+        percentage: 84.6,
+      },
+      {
+        courseId: 4,
+        course: 'Organic Chemistry',
+        present: 32,
+        total: 34,
+        percentage: 94.1,
+      },
+    ],
+    quizzes: [
+      {
+        id: 1,
+        courseId: 3,
+        title: 'Neural Networks Quiz',
+        questions: 10,
+        difficulty: 'adaptive',
+        completed: false,
+        score: null,
+      },
+      {
+        id: 2,
+        courseId: 1,
+        title: 'Vector Calculus Quiz',
+        questions: 8,
+        difficulty: 'hard',
+        completed: true,
+        score: 92,
+      },
+    ],
+    badges: [
+      {
+        id: 1,
+        name: 'Quantum Master',
+        icon: '⚡',
+        earned: '2025-04-10',
+        rarity: 'rare',
+      },
+      {
+        id: 2,
+        name: '7-Day Streak',
+        icon: '🔥',
+        earned: '2025-04-15',
+        rarity: 'common',
+      },
+      {
+        id: 3,
+        name: 'Perfect Score',
+        icon: '⭐',
+        earned: '2025-04-12',
+        rarity: 'epic',
+      },
+      {
+        id: 4,
+        name: 'Early Bird',
+        icon: '🌅',
+        earned: '2025-04-01',
+        rarity: 'uncommon',
+      },
+    ],
+    leaderboard: [
+      { rank: 1, name: 'Alex Chen', points: 3420, avatar: '👨‍🎓', streak: 12 },
+      { rank: 2, name: 'Sarah Kim', points: 3190, avatar: '👩‍🎓', streak: 10 },
+      { rank: 3, name: 'You', points: 2840, avatar: '🎯', streak: 7 },
+      { rank: 4, name: 'Mike Johnson', points: 2720, avatar: '👨‍💻', streak: 5 },
+      { rank: 5, name: 'Emma Wilson', points: 2650, avatar: '👩‍🔬', streak: 8 },
+    ],
+    streak: 7,
+    points: 2840,
+    profilePic: '',
+  });
+
+  const getAllAvailableCourses = () => [
+    {
+      id: 5,
+      name: 'Data Structures & Algorithms',
+      code: 'CS201',
+      instructor: 'Prof. Alan Turing',
+      rating: 4.9,
+      students: 234,
+      difficulty: 'Intermediate',
+      category: 'Computer Science',
+      recommended: true,
+    },
+    {
+      id: 6,
+      name: 'Linear Algebra',
+      code: 'MATH202',
+      instructor: 'Dr. Maria Gauss',
+      rating: 4.8,
+      students: 189,
+      difficulty: 'Intermediate',
+      category: 'Mathematics',
+      recommended: true,
+    },
+    {
+      id: 7,
+      name: 'Thermodynamics',
+      code: 'PHYS305',
+      instructor: 'Prof. Richard Feynman',
+      rating: 4.7,
+      students: 156,
+      difficulty: 'Advanced',
+      category: 'Physics',
+      recommended: false,
+    },
+    {
+      id: 8,
+      name: 'Artificial Intelligence',
+      code: 'CS601',
+      instructor: 'Dr. Yann LeCun',
+      rating: 5.0,
+      students: 312,
+      difficulty: 'Expert',
+      category: 'Computer Science',
+      recommended: true,
+    },
+  ];
+
+  const recommendedCourses = useMemo(() => {
+    return allCourses.filter((c) => c.recommended);
+  }, [allCourses]);
+
+  const handleEnroll = (courseId) => {
+    const course = allCourses.find((c) => c.id === courseId);
+    if (course) {
+      const newCourse = {
+        ...course,
+        id: Date.now(),
+        progress: 0,
+        enrolled: new Date().toISOString().split('T')[0],
+        totalLectures: 40,
+        completedLectures: 0,
+      };
+      setCourses((prev) => [...prev, newCourse]);
+      setNotifications((prev) => [
+        {
+          id: Date.now(),
+          type: 'success',
+          message: `Successfully enrolled in ${course.name}!`,
+          time: 'just now',
+          read: false,
+        },
+        ...prev,
+      ]);
+      alert(`Enrolled in ${course.name}! Welcome!`);
+    }
+  };
+
+  const handleFileSubmit = (assignmentId) => {
+    if (!selectedFile) return;
+    setAssignments((prev) =>
+      prev.map((a) =>
+        a.id === assignmentId
+          ? {
+              ...a,
+              status: 'submitted',
+              submittedAt: new Date().toISOString().split('T')[0],
+              grade: 'Pending Review',
+            }
+          : a
+      )
+    );
+    setPoints((prev) => prev + 50);
+    setSelectedFile(null);
+    setNotifications((prev) => [
+      {
+        id: Date.now(),
+        type: 'submission',
+        message: 'Assignment submitted successfully! +50 points',
+        time: 'just now',
+        read: false,
+      },
+      ...prev,
+    ]);
+  };
+
+  const handleQuizAnswer = (quizId, questionId, answer) => {
+    setQuizAnswers((prev) => ({ ...prev, [questionId]: answer }));
+  };
+
+  const submitQuiz = (quizId) => {
+    const quiz = quizzes.find((q) => q.id === quizId);
+    const score = Math.floor(Math.random() * 40) + 60; // Simulated
+    setQuizzes((prev) =>
+      prev.map((q) => (q.id === quizId ? { ...q, completed: true, score } : q))
+    );
+    setPoints((prev) => prev + score);
+    setShowQuiz(null);
+    setNotifications((prev) => [
+      {
+        id: Date.now(),
+        type: 'quiz',
+        message: `Quiz completed! Score: ${score}% +${score} points`,
+        time: 'just now',
+        read: false,
+      },
+      ...prev,
+    ]);
+  };
+
+  const markNotificationRead = (id) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    );
+  };
+
+  const uploadProfilePic = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setProfilePic(ev.target.result);
+        setNotifications((prev) => [
+          {
+            id: Date.now(),
+            type: 'profile',
+            message: 'Profile picture updated!',
+            time: 'just now',
+            read: false,
+          },
+          ...prev,
+        ]);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleChangePassword = () => {
+    if (newPassword !== confirmPassword) {
+      alert('Passwords do not match!');
+      return;
+    }
+    if (newPassword.length < 6) {
+      alert('Password must be at least 6 characters');
+      return;
+    }
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const updated = users.map((u) =>
+      u.username === user.username ? { ...u, password: newPassword } : u
+    );
+    localStorage.setItem('users', JSON.stringify(updated));
+    setShowChangePassword(false);
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+    alert('Password changed successfully!');
+  };
+
+  const handleContactInstructor = () => {
+    if (!messageText.trim()) return;
+    setShowContactModal(false);
+    setMessageText('');
+    setNotifications((prev) => [
+      {
+        id: Date.now(),
+        type: 'message',
+        message: `Message sent to ${selectedCourse.instructor}`,
+        time: 'just now',
+        read: false,
+      },
+      ...prev,
+    ]);
+    alert('Message sent to instructor!');
+  };
+
+  const handleRateCourse = (courseId, rating, review) => {
+    setCourses((prev) =>
+      prev.map((c) =>
+        c.id === courseId ? { ...c, myRating: rating, myReview: review } : c
+      )
+    );
+    setPoints((prev) => prev + 25);
+    alert('Thank you for your feedback! +25 points');
+  };
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+  const avgGrade =
+    assignments.filter((a) => a.grade && a.grade !== 'Pending Review').length >
+    0
+      ? (assignments
+          .filter((a) => a.grade && a.grade !== 'Pending Review')
+          .reduce((acc, a) => {
+            const grades = {
+              A: 4,
+              'A-': 3.7,
+              'B+': 3.3,
+              B: 3,
+              'B-': 2.7,
+              'C+': 2.3,
+            };
+            return acc + (grades[a.grade] || 0);
+          }, 0) /
+          assignments.filter((a) => a.grade && a.grade !== 'Pending Review')
+            .length) *
+        25
+      : 0;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+      {/* HEADER */}
+      <header className="bg-white/95 backdrop-blur-sm shadow-lg border-b border-slate-200 sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="lg:hidden"
+              >
+                <Menu className="w-6 h-6 text-slate-600" />
+              </button>
+              <div className="flex items-center space-x-3">
+                <GraduationCap className="w-9 h-9 text-blue-600" />
+                <div>
+                  <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    EduPro LMS
+                  </h1>
+                  <p className="text-xs text-slate-500">
+                    Next-Gen Learning Platform
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="hidden lg:flex items-center space-x-6">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search courses, assignments, instructors..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-11 pr-4 py-3 w-96 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <button className="relative p-3 hover:bg-slate-100 rounded-xl transition">
+                  <Bell className="w-6 h-6 text-slate-600" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                  )}
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                <div className="flex items-center space-x-4 pl-6 border-l border-slate-200">
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-slate-800">
+                      {user.username}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Level {Math.floor(points / 500)} • {points} pts
+                    </p>
+                  </div>
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={uploadProfilePic}
+                    />
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 p-0.5">
+                      <div className="w-full h-full rounded-full bg-white p-0.5">
+                        <div className="w-full h-full rounded-full overflow-hidden bg-slate-200 flex items-center justify-center">
+                          {profilePic ? (
+                            <img
+                              src={profilePic}
+                              alt="Profile"
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <User className="w-6 h-6 text-slate-500" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </label>
+                  <button
+                    onClick={() => setShowChangePassword(true)}
+                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                  >
+                    Change Password
+                  </button>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem('currentUser');
+                      localStorage.removeItem('loginTime');
+                      window.location.href = '/';
+                    }}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    <LogOut className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* GAMIFICATION BAR */}
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-3">
+                <Flame className="w-8 h-8 animate-pulse" />
+                <div>
+                  <p className="text-2xl font-bold">{streak} Day Streak</p>
+                  <p className="text-sm opacity-90">Keep it up!</p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Trophy className="w-8 h-8" />
+                <div>
+                  <p className="text-2xl font-bold">
+                    {points.toLocaleString()} Points
+                  </p>
+                  <p className="text-sm opacity-90">
+                    Rank #{leaderboard.findIndex((l) => l.name === 'You') + 1}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center space-x-4">
+              {badges.slice(0, 4).map((badge) => (
+                <div key={badge.id} className="text-3xl" title={badge.name}>
+                  {badge.icon}
+                </div>
+              ))}
+              {badges.length > 4 && (
+                <div className="bg-white/20 px-3 py-1 rounded-full text-sm">
+                  +{badges.length - 4} more
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* STATS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-2xl shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-blue-100 text-sm">Enrolled Courses</p>
+                <p className="text-4xl font-bold mt-2">{courses.length}</p>
+                <p className="text-blue-200 text-sm mt-1">
+                  Active this semester
+                </p>
+              </div>
+              <BookOpen className="w-16 h-16 text-blue-200 opacity-50" />
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-green-500 to-emerald-600 text-white p-6 rounded-2xl shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-green-100 text-sm">Assignments</p>
+                <p className="text-4xl font-bold mt-2">
+                  {assignments.filter((a) => a.status === 'submitted').length}/
+                  {assignments.length}
+                </p>
+                <p className="text-green-200 text-sm mt-1">Submitted on time</p>
+              </div>
+              <CheckCircle className="w-16 h-16 text-green-200 opacity-50" />
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-6 rounded-2xl shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-purple-100 text-sm">Current GPA</p>
+                <p className="text-4xl font-bold mt-2">{avgGrade.toFixed(2)}</p>
+                <p className="text-purple-200 text-sm mt-1">Tentative grade</p>
+              </div>
+              <Target className="w-16 h-16 text-purple-200 opacity-50" />
+            </div>
+          </div>
+          <div className="bg-gradient-to-br from-orange-500 to-red-600 text-white p-6 rounded-2xl shadow-xl">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-orange-100 text-sm">Attendance</p>
+                <p className="text-4xl font-bold mt-2">
+                  {attendance.length > 0
+                    ? Math.round(
+                        attendance.reduce((a, b) => a + b.percentage, 0) /
+                          attendance.length
+                      )
+                    : 0}
+                  %
+                </p>
+                <p className="text-orange-200 text-sm mt-1">Overall average</p>
+              </div>
+              <Users className="w-16 h-16 text-orange-200 opacity-50" />
+            </div>
+          </div>
+        </div>
+
+        {/* RECOMMENDED COURSES */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-3xl font-bold text-slate-800 flex items-center">
+              <Sparkles className="w-8 h-8 mr-3 text-yellow-500" />
+              Recommended For You
+            </h2>
+            <button className="text-blue-600 hover:text-blue-700 font-medium flex items-center">
+              View All <ChevronRight className="w-5 h-5 ml-1" />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {recommendedCourses.map((course) => (
+              <div
+                key={course.id}
+                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all transform hover:-translate-y-1"
+              >
+                <div className="bg-gradient-to-r from-purple-500 to-blue-600 h-32 flex items-center justify-center">
+                  <Brain className="w-16 h-16 text-white opacity-80" />
+                </div>
+                <div className="p-6">
+                  <h3 className="font-bold text-lg text-slate-800">
+                    {course.name}
+                  </h3>
+                  <p className="text-sm text-slate-600 mt-1">
+                    {course.instructor}
+                  </p>
+                  <div className="flex items-center mt-3 space-x-2">
+                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
+                    <span className="text-sm font-medium">{course.rating}</span>
+                    <span className="text-xs text-slate-500">
+                      ({course.students} students)
+                    </span>
+                  </div>
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                      {course.difficulty}
+                    </span>
+                    <button
+                      onClick={() => handleEnroll(course.id)}
+                      className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition"
+                    >
+                      Enroll Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* MAIN GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* LEFT COLUMN */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* MY COURSES */}
+            <div>
+              <h2 className="text-3xl font-bold text-slate-800 mb-6">
+                My Courses
+              </h2>
+              <div className="space-y-6">
+                {courses.map((course) => (
+                  <div
+                    key={course.id}
+                    className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all"
+                  >
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-2xl font-bold">{course.name}</h3>
+                          <p className="text-blue-100 mt-1">
+                            {course.code} • {course.instructor}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-center space-x-1">
+                            <Star className="w-5 h-5 fill-current" />
+                            <span className="text-lg font-bold">
+                              {course.rating}
+                            </span>
+                          </div>
+                          <p className="text-xs opacity-90">Course Rating</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-6">
+                      <div className="grid grid-cols-3 gap-4 mb-6">
+                        <div>
+                          <p className="text-sm text-slate-600">Progress</p>
+                          <p className="text-2xl font-bold text-slate-800">
+                            {course.progress}%
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-slate-600">Lectures</p>
+                          <p className="text-2xl font-bold text-slate-800">
+                            {course.completedLectures}/{course.totalLectures}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm text-slate-600">Enrolled</p>
+                          <p className="text-lg font-bold text-slate-800">
+                            {course.enrolled}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="mb-6">
+                        <div className="flex justify-between text-sm mb-2">
+                          <span>Course Progress</span>
+                          <span className="font-medium">
+                            {course.progress}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-4 overflow-hidden">
+                          <div
+                            className="bg-gradient-to-r from-blue-600 to-purple-600 h-4 rounded-full transition-all duration-1000"
+                            style={{ width: `${course.progress}%` }}
+                          >
+                            <div className="h-full bg-white/30 animate-pulse"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <button className="py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold flex items-center justify-center space-x-3 hover:shadow-lg transition">
+                          <PlayCircle className="w-6 h-6" />
+                          <span>Continue Learning</span>
+                        </button>
+                        <button className="py-4 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold flex items-center justify-center space-x-3 transition">
+                          <Download className="w-6 h-6" />
+                          <span>Download Materials</span>
+                        </button>
+                      </div>
+                      <div className="mt-4 flex justify-between items-center">
+                        <button
+                          onClick={() => setSelectedCourse(course)}
+                          className="text-blue-600 hover:text-blue-700 font-medium flex items-center"
+                        >
+                          <MessageSquare className="w-5 h-5 mr-2" />
+                          Contact Instructor
+                        </button>
+                        <button className="text-purple-600 hover:text-purple-700 font-medium">
+                          View Recorded Lectures
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ASSIGNMENTS */}
+            <div>
+              <h2 className="text-3xl font-bold text-slate-800 mb-6">
+                Upcoming Assignments
+              </h2>
+              <div className="space-y-4">
+                {assignments.map((assignment) => (
+                  <div
+                    key={assignment.id}
+                    className="bg-white p-6 rounded-2xl shadow-lg border border-slate-200"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h4 className="text-xl font-bold text-slate-800">
+                          {assignment.title}
+                        </h4>
+                        <p className="text-slate-600">{assignment.course}</p>
+                      </div>
+                      <div className="text-right">
+                        {assignment.status === 'submitted' ? (
+                          <span className="px-4 py-2 bg-green-100 text-green-700 rounded-full font-medium">
+                            Submitted
+                          </span>
+                        ) : (
+                          <span className="px-4 py-2 bg-red-100 text-red-700 rounded-full font-medium">
+                            Due {assignment.due}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    {assignment.grade && (
+                      <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
+                        <div className="flex justify-between items-center">
+                          <p className="text-2xl font-bold text-green-700">
+                            Grade: {assignment.grade}
+                          </p>
+                          <button
+                            onClick={() => setFeedbackModal(assignment)}
+                            className="text-green-700 hover:text-green-800 font-medium"
+                          >
+                            View Feedback →
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {assignment.status === 'pending' && (
+                      <div className="mt-4">
+                        <input
+                          type="file"
+                          onChange={(e) => setSelectedFile(e.target.files[0])}
+                          className="block w-full text-sm text-slate-500 file:mr-4 file:py-3 file:px-6 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-gradient-to-r file:from-blue-600 file:to-purple-600 file:text-white hover:file:from-blue-700 hover:file:to-purple-700"
+                        />
+                        <button
+                          onClick={() => handleFileSubmit(assignment.id)}
+                          disabled={!selectedFile}
+                          className="mt-4 w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-3"
+                        >
+                          <Upload className="w-6 h-6" />
+                          <span>Submit Assignment</span>
+                        </button>
+                      </div>
+                    )}
+                    {assignment.submittedAt && (
+                      <p className="text-sm text-slate-500 mt-4">
+                        Submitted on {assignment.submittedAt} • Confirmed
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT SIDEBAR */}
+          <div className="space-y-8">
+            {/* CALENDAR */}
+            <div className="bg-white rounded-2xl shadow-xl p-6">
+              <h3 className="text-2xl font-bold text-slate-800 mb-4 flex items-center">
+                <CalendarDays className="w-7 h-7 mr-3 text-blue-600" />
+                This Week
+              </h3>
+              <div className="space-y-3">
+                {schedule.slice(0, 6).map((item, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl"
+                  >
+                    <div>
+                      <p className="font-bold text-slate-800">{item.course}</p>
+                      <p className="text-sm text-slate-600">
+                        {item.day} • {item.time} • {item.room}
+                      </p>
+                    </div>
+                    <span className="text-xs bg-blue-600 text-white px-3 py-1 rounded-full">
+                      {item.type}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* LEADERBOARD */}
+            <div className="bg-gradient-to-b from-purple-600 to-blue-600 text-white rounded-2xl shadow-xl p-6">
+              <h3 className="text-2xl font-bold mb-4 flex items-center">
+                <Trophy className="w-8 h-8 mr-3" />
+                Leaderboard
+              </h3>
+              <div className="space-y-3">
+                {leaderboard.slice(0, 5).map((player, index) => (
+                  <div
+                    key={index}
+                    className={`flex items-center justify-between p-3 rounded-xl ${
+                      player.name === 'You' ? 'bg-white/20' : 'bg-white/10'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">
+                        {index < 3
+                          ? ['🥇', '🥈', '🥉'][index]
+                          : `#${index + 1}`}
+                      </span>
+                      <span className="text-2xl">{player.avatar}</span>
+                      <div>
+                        <p className="font-bold">{player.name}</p>
+                        <p className="text-xs opacity-90">
+                          {player.streak} day streak
+                        </p>
+                      </div>
+                    </div>
+                    <p className="font-bold text-lg">
+                      {player.points.toLocaleString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* BADGES */}
+            <div className="bg-white rounded-2xl shadow-xl p-6">
+              <h3 className="text-2xl font-bold text-slate-800 mb-4">
+                Your Badges
+              </h3>
+              <div className="grid grid-cols-3 gap-4">
+                {badges.map((badge) => (
+                  <div key={badge.id} className="text-center">
+                    <div className="text-5xl mb-2">{badge.icon}</div>
+                    <p className="text-xs font-medium text-slate-700">
+                      {badge.name}
+                    </p>
+                    <p className="text-xs text-slate-500">{badge.earned}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* MODALS */}
+      {feedbackModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-2xl w-full shadow-2xl">
+            <div className="text-center mb-8">
+              <div className="text-8xl mb-4">🎉</div>
+              <p className="text-5xl font-bold text-green-600">
+                {feedbackModal.grade}
+              </p>
+            </div>
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl">
+              <p className="text-lg text-slate-800 leading-relaxed">
+                {feedbackModal.feedback ||
+                  "Outstanding work! You've demonstrated exceptional understanding of the material. Your solutions were creative and well-structured. Keep up this level of excellence!"}
+              </p>
+            </div>
+            <button
+              onClick={() => setFeedbackModal(null)}
+              className="mt-8 w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-2xl font-bold text-lg"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {showChangePassword && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full">
+            <h3 className="text-2xl font-bold mb-6">Change Password</h3>
+            <input
+              type="password"
+              placeholder="Current Password"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              className="w-full px-4 py-3 border border-slate-300 rounded-xl mb-4"
+            />
+            <input
+              type="password"
+              placeholder="New Password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full px-4 py-3 border border-slate-300 rounded-xl mb-4"
+            />
+            <input
+              type="password"
+              placeholder="Confirm New Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full px-4 py-3 border border-slate-300 rounded-xl mb-6"
+            />
+            <div className="flex space-x-4">
+              <button
+                onClick={handleChangePassword}
+                className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold"
+              >
+                Update Password
+              </button>
+              <button
+                onClick={() => setShowChangePassword(false)}
+                className="flex-1 py-3 bg-slate-200 text-slate-700 rounded-xl font-bold"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showContactModal && selectedCourse && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-lg w-full">
+            <h3 className="text-2xl font-bold mb-4">Contact Instructor</h3>
+            <p className="text-slate-600 mb-6">
+              Sending message to <strong>{selectedCourse.instructor}</strong> (
+              {selectedCourse.name})
+            </p>
+            <textarea
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              placeholder="Type your question or message..."
+              className="w-full h-32 px-4 py-3 border border-slate-300 rounded-xl resize-none mb-6"
+            />
+            <div className="flex space-x-4">
+              <button
+                onClick={handleContactInstructor}
+                className="flex-1 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold flex items-center justify-center space-x-2"
+              >
+                <Send className="w-5 h-5" />
+                <span>Send Message</span>
+              </button>
+              <button
+                onClick={() => {
+                  setShowContactModal(false);
+                  setMessageText('');
+                }}
+                className="flex-1 py-3 bg-slate-200 text-slate-700 rounded-xl font-bold"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   BookOpen,
@@ -1812,3 +3104,4 @@ export default function StudentDashboard() {
     </div>
   );
 }
+
