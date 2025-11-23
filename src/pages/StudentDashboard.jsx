@@ -60,7 +60,13 @@ import {
   PolarRadiusAxis,
   Radar,
 } from 'recharts';
-import { format, addDays, isToday, isBefore, startOfWeek } from 'date-fns';
+import { format, addDays, isToday, startOfWeek } from 'date-fns';
+
+import { createClient } from '@supabase/supabase-js';
+const SUPABASE_URL = 'https://xdjljhvtudfiwbcxptel.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_K6eSz3NTh7NU65EVYQlvkA_vKCKWXV1';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const PREDEFINED_USERS = [
   {
@@ -83,6 +89,7 @@ const PREDEFINED_USERS = [
   },
 ];
 
+/*
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [user, setUser] = useState({});
@@ -124,17 +131,7 @@ export default function StudentDashboard() {
     body: '',
   });
 
-  /*
-  useEffect(() => {
-    const current = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (current.role !== 'student') {
-      window.location.href = '/';
-      return;
-    }
-    setUser(current);
-    loadStudentData();
-  }, []);
-  */
+  
   useEffect(() => {
     const current = JSON.parse(localStorage.getItem('currentUser') || '{}');
     if (current.role !== 'student') {
@@ -185,44 +182,7 @@ export default function StudentDashboard() {
     },
     [user.id]
   );
-  /*
-  const loadStudentData = useCallback(async () => {
-    try {
-      const data = await getFromStorage('student-dashboard-data');
-      if (data && data.userId === user.id) {
-        setEnrolledCourses(data.enrolledCourses || []);
-        setAssignments(data.assignments || []);
-        setSubmissions(data.submissions || []);
-        setGrades(data.grades || []);
-        setAttendance(data.attendance || []);
-        setCalendarEvents(data.calendarEvents || []);
-        setNotifications(data.notifications || []);
-        setMessages(data.messages || []);
-        setBadges(data.badges || []);
-        setStreak(data.streak || 0);
-        setPoints(data.points || 0);
-        setLeaderboard(data.leaderboard || []);
-        setRecordedLectures(data.recordedLectures || []);
-        setResources(data.resources || []);
-        setReviews(data.reviews || []);
-      } else {
-        const defaultData = generateDefaultStudentData();
-        await saveToStorage('student-dashboard-data', {
-          ...defaultData,
-          userId: user.id,
-        });
-        initializeStudentData(defaultData);
-      }
-    } catch (err) {
-      const defaultData = generateDefaultStudentData();
-      await saveToStorage('student-dashboard-data', {
-        ...defaultData,
-        userId: user.id,
-      });
-      initializeStudentData(defaultData);
-    }
-  }, [user.id]);
-  */
+  
   const initializeStudentData = (data) => {
     setEnrolledCourses(data.enrolledCourses);
     setAssignments(data.assignments);
@@ -458,48 +418,7 @@ export default function StudentDashboard() {
     localStorage.setItem(key, JSON.stringify(data));
   };
 
-  /*
-
-  useEffect(() => {
-    if (enrolledCourses.length > 0) {
-      saveToStorage('student-dashboard-data', {
-        userId: user.id,
-        enrolledCourses,
-        assignments,
-        submissions,
-        grades,
-        attendance,
-        calendarEvents,
-        notifications,
-        messages,
-        badges,
-        streak,
-        points,
-        leaderboard,
-        recordedLectures,
-        resources,
-        reviews,
-      });
-    }
-  }, [
-    enrolledCourses,
-    assignments,
-    submissions,
-    grades,
-    attendance,
-    calendarEvents,
-    notifications,
-    messages,
-    badges,
-    streak,
-    points,
-    leaderboard,
-    recordedLectures,
-    resources,
-    reviews,
-    user.id,
-  ]);
-  */
+  
   useEffect(() => {
     if (enrolledCourses.length > 0) {
       const current = JSON.parse(localStorage.getItem('currentUser') || '{}');
@@ -608,42 +527,7 @@ export default function StudentDashboard() {
       reader.readAsDataURL(file);
     }
   };
-  /*
-
-  const submitAssignment = (assignmentId) => {
-    if (!submissionFile) {
-      alert('Please select a file to submit.');
-      return;
-    }
-    const assignment = assignments.find((a) => a.id === assignmentId);
-    if (assignment) {
-      setAssignments(
-        assignments.map((a) =>
-          a.id === assignmentId
-            ? { ...a, status: 'submitted', file: submissionFile.name }
-            : a
-        )
-      );
-      setSubmissions([
-        ...submissions,
-        {
-          assignmentId,
-          date: new Date().toISOString(),
-          file: submissionFile.name,
-          data: submissionFile.data,
-        },
-      ]);
-      addNotification(
-        `Assignment "${assignment.title}" submitted successfully with file ${submissionFile.name}!`,
-        'submission'
-      );
-      setPoints(points + 50);
-      setStreak(streak + 1);
-      setSubmissionFile(null);
-      setShowModal(null);
-    }
-  };
-*/
+  
   const submitAssignment = (assignmentId) => {
     if (!submissionFile) {
       alert('Please select a file to submit.');
@@ -779,30 +663,7 @@ export default function StudentDashboard() {
     input.click();
   };
 
-  /*
-  const sendMessage = () => {
-    if (!newMessage.to || !newMessage.subject || !newMessage.body) {
-      alert('Please fill all fields.');
-      return;
-    }
-    const newMsg = {
-      id: Date.now(),
-      from: 'You',
-      to: newMessage.to,
-      subject: newMessage.subject,
-      body: newMessage.body,
-      time: 'Just now',
-      read: true,
-    };
-    setMessages([...messages, newMsg]);
-    addNotification(
-      `Message sent to ${newMessage.to}: ${newMessage.subject}`,
-      'message'
-    );
-    setNewMessage({ to: '', subject: '', body: '' });
-    setShowModal(null);
-  };
-  */
+  
   const sendMessage = () => {
     if (!newMessage.to || !newMessage.subject || !newMessage.body) {
       alert('Please fill all fields.');
@@ -844,6 +705,429 @@ export default function StudentDashboard() {
   const upcomingEvents = calendarEvents
     .filter((e) => isBefore(new Date(e.date), addDays(new Date(), 7)))
     .sort((a, b) => new Date(a.date) - new Date(b.date));
+*/
+export default function StudentDashboard() {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [user, setUser] = useState({});
+  const [userId, setUserId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [showModal, setShowModal] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [enrolledCourses, setEnrolledCourses] = useState([]);
+  const [availableCourses, setAvailableCourses] = useState([]);
+  const [assignments, setAssignments] = useState([]);
+  const [submissions, setSubmissions] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [badges, setBadges] = useState([]);
+  const [streak, setStreak] = useState(0);
+  const [points, setPoints] = useState(0);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [recordedLectures, setRecordedLectures] = useState([]);
+  const [calendarEvents, setCalendarEvents] = useState([]);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    current: '',
+    new: '',
+    confirm: '',
+  });
+  const [showPassword, setShowPassword] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
+  const [selectedAssignment, setSelectedAssignment] = useState(null);
+  const [submissionFile, setSubmissionFile] = useState(null);
+  const [newMessage, setNewMessage] = useState({
+    to: '',
+    subject: '',
+    body: '',
+  });
+
+  useEffect(() => {
+    initializeApp();
+  }, []);
+
+  const initializeApp = async () => {
+    const current = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    if (current.role !== 'student') {
+      window.location.href = '/';
+      return;
+    }
+    setUser(current);
+
+    const { data: existingUser } = await supabase
+      .from('users')
+      .select('id')
+      .eq('username', current.username)
+      .single();
+    if (existingUser) {
+      setUserId(existingUser.id);
+      await loadStudentData(existingUser.id);
+    } else {
+      const { data: newUser } = await supabase
+        .from('users')
+        .insert([
+          {
+            username: current.username,
+            password: current.password,
+            name: current.name || current.username,
+            email: current.email || `${current.username}@university.edu`,
+            role: 'student',
+          },
+        ])
+        .select()
+        .single();
+      if (newUser) {
+        setUserId(newUser.id);
+        await initializeDefaultData(newUser.id);
+      }
+    }
+    setLoading(false);
+  };
+
+  const loadStudentData = async (uid) => {
+    try {
+      const { data: courses } = await supabase
+        .from('courses')
+        .select('*')
+        .eq('student_id', uid);
+      setEnrolledCourses(courses || []);
+      const { data: assignmentsData } = await supabase
+        .from('assignments')
+        .select('*')
+        .eq('student_id', uid);
+      setAssignments(assignmentsData || []);
+      const { data: submissionsData } = await supabase
+        .from('submissions')
+        .select('*')
+        .eq('student_id', uid);
+      setSubmissions(submissionsData || []);
+      const { data: messagesData } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('to_user', user.username);
+      setMessages(messagesData || []);
+      setAvailableCourses([
+        {
+          id: 101,
+          name: 'Data Science Fundamentals',
+          instructor: 'Dr. Patel',
+          students: 45,
+          rating: 4.9,
+          level: 'Intermediate',
+          tags: ['Python', 'ML'],
+        },
+        {
+          id: 102,
+          name: 'UI/UX Design',
+          instructor: 'Sarah Kim',
+          students: 38,
+          rating: 4.7,
+          level: 'Beginner',
+          tags: ['Figma', 'Design'],
+        },
+        {
+          id: 103,
+          name: 'Machine Learning',
+          instructor: 'Prof. Garcia',
+          students: 29,
+          rating: 5.0,
+          level: 'Advanced',
+          tags: ['Python', 'TensorFlow'],
+        },
+      ]);
+      setBadges([
+        {
+          id: 1,
+          name: 'Early Bird',
+          icon: '🕊️',
+          desc: 'Submitted 5 assignments early',
+        },
+        { id: 2, name: 'Quiz Master', icon: '🏆', desc: '100% on 3 quizzes' },
+        { id: 3, name: 'Perfect Week', icon: '🔥', desc: '7-day streak' },
+      ]);
+      setStreak(7);
+      setPoints(2450);
+      setLeaderboard([
+        { rank: 1, name: 'Emma Wilson', points: 3200, avatar: '1' },
+        { rank: 2, name: 'You', points: 2450, avatar: '2' },
+        { rank: 3, name: 'James Chen', points: 2300, avatar: '3' },
+      ]);
+      setRecordedLectures([
+        {
+          id: 1,
+          title: 'Week 5: Derivatives',
+          courseId: 1,
+          duration: '1h 20m',
+          date: '2025-11-05',
+        },
+        {
+          id: 2,
+          title: "Newton's Laws Deep Dive",
+          courseId: 2,
+          duration: '58m',
+          date: '2025-11-03',
+        },
+        {
+          id: 3,
+          title: 'React Hooks Introduction',
+          courseId: 3,
+          duration: '45m',
+          date: '2025-11-01',
+        },
+      ]);
+      setCalendarEvents([
+        {
+          id: 1,
+          title: 'Math Quiz',
+          date: '2025-11-22',
+          type: 'quiz',
+          courseId: 1,
+        },
+        {
+          id: 2,
+          title: 'Physics Midterm',
+          date: '2025-11-25',
+          type: 'exam',
+          courseId: 2,
+        },
+        {
+          id: 3,
+          title: 'Project Demo',
+          date: '2025-11-28',
+          type: 'presentation',
+          courseId: 3,
+        },
+      ]);
+      setNotifications([
+        { id: 1, text: 'New assignment posted', time: '2h ago', read: false },
+        { id: 2, text: 'Grade released: 88%', time: '5h ago', read: false },
+        {
+          id: 3,
+          text: 'Lecture recording available',
+          time: '1d ago',
+          read: true,
+        },
+      ]);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
+  };
+
+  const initializeDefaultData = async (uid) => {
+    try {
+      const { data: courses } = await supabase
+        .from('courses')
+        .insert([
+          {
+            name: 'Advanced Mathematics',
+            progress: 68,
+            instructor: 'Dr. Smith',
+            color: 'bg-blue-500',
+            rating: 4.5,
+            student_id: uid,
+          },
+          {
+            name: 'Physics 101',
+            progress: 82,
+            instructor: 'Prof. Johnson',
+            color: 'bg-purple-500',
+            rating: 4.8,
+            student_id: uid,
+          },
+          {
+            name: 'Web Development',
+            progress: 45,
+            instructor: 'Ms. Lee',
+            color: 'bg-green-500',
+            rating: 4.9,
+            student_id: uid,
+          },
+        ])
+        .select();
+      if (courses && courses.length > 0) {
+        await supabase.from('assignments').insert([
+          {
+            title: 'Calculus Final Project',
+            course_id: courses[0].id,
+            due_date: '2025-11-25',
+            status: 'pending',
+            student_id: uid,
+          },
+          {
+            title: 'Physics Lab Report',
+            course_id: courses[1].id,
+            due_date: '2025-11-22',
+            status: 'pending',
+            student_id: uid,
+          },
+          {
+            title: 'React Portfolio',
+            course_id: courses[2].id,
+            due_date: '2025-11-28',
+            status: 'not-started',
+            student_id: uid,
+          },
+        ]);
+      }
+      await loadStudentData(uid);
+    } catch (error) {
+      console.error('Error initializing:', error);
+    }
+  };
+
+  const enrollInCourse = async (course) => {
+    try {
+      const { data } = await supabase
+        .from('courses')
+        .insert([
+          {
+            name: course.name,
+            progress: 0,
+            instructor: course.instructor,
+            color: ['bg-red-500', 'bg-yellow-500', 'bg-pink-500'][
+              Math.floor(Math.random() * 3)
+            ],
+            rating: course.rating,
+            student_id: userId,
+          },
+        ])
+        .select()
+        .single();
+      if (data) {
+        setEnrolledCourses([...enrolledCourses, data]);
+        setPoints(points + 100);
+      }
+    } catch (error) {
+      console.error('Error enrolling:', error);
+    }
+  };
+
+  const submitAssignment = async (assignmentId) => {
+    if (!submissionFile) {
+      alert('Please select a file.');
+      return;
+    }
+    try {
+      const assignment = assignments.find((a) => a.id === assignmentId);
+      if (!assignment) return;
+      const { data: submission } = await supabase
+        .from('submissions')
+        .insert([
+          {
+            assignment_id: assignmentId,
+            student_id: userId,
+            student_name: user.name || user.username,
+            file_name: submissionFile.name,
+            grade: null,
+            feedback: '',
+          },
+        ])
+        .select()
+        .single();
+      await supabase
+        .from('assignments')
+        .update({ status: 'submitted' })
+        .eq('id', assignmentId);
+      if (submission) {
+        setSubmissions([...submissions, submission]);
+        setAssignments(
+          assignments.map((a) =>
+            a.id === assignmentId ? { ...a, status: 'submitted' } : a
+          )
+        );
+        setPoints(points + 50);
+        setStreak(streak + 1);
+      }
+      setSubmissionFile(null);
+      setShowModal(null);
+    } catch (error) {
+      console.error('Error submitting:', error);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!newMessage.to || !newMessage.subject || !newMessage.body) {
+      alert('Fill all fields.');
+      return;
+    }
+    try {
+      const { data } = await supabase
+        .from('messages')
+        .insert([
+          {
+            from_user: user.username,
+            from_name: user.name || user.username,
+            to_user: newMessage.to,
+            subject: newMessage.subject,
+            body: newMessage.body,
+            read: false,
+          },
+        ])
+        .select()
+        .single();
+      if (data) setMessages([...messages, data]);
+      setNewMessage({ to: '', subject: '', body: '' });
+      setShowModal(null);
+    } catch (error) {
+      console.error('Error sending:', error);
+    }
+  };
+
+  const continueLearning = async (courseId) => {
+    try {
+      const course = enrolledCourses.find((c) => c.id === courseId);
+      const newProgress = Math.min(100, course.progress + 10);
+      await supabase
+        .from('courses')
+        .update({ progress: newProgress })
+        .eq('id', courseId);
+      setEnrolledCourses(
+        enrolledCourses.map((c) =>
+          c.id === courseId ? { ...c, progress: newProgress } : c
+        )
+      );
+    } catch (error) {
+      console.error('Error updating:', error);
+    }
+  };
+
+  const watchLecture = (lecture) => {
+    const query = encodeURIComponent(`${lecture.title} lecture`);
+    window.open(
+      `https://www.youtube.com/results?search_query=${query}`,
+      '_blank'
+    );
+  };
+
+  const handlePasswordChange = async () => {
+    if (passwordData.new !== passwordData.confirm) {
+      alert('Passwords do not match!');
+      return;
+    }
+    try {
+      await supabase
+        .from('users')
+        .update({ password: passwordData.new })
+        .eq('id', userId);
+      alert('Password changed!');
+      setShowPasswordModal(false);
+      setPasswordData({ current: '', new: '', confirm: '' });
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-slate-600 font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const renderTabContent = () => {
     switch (activeTab) {
